@@ -1,0 +1,26 @@
+#!/bin/sh
+
+if [[ $(ls /dev/disk/by-id/usb-HP_iLO*-part1 | wc -l) -ne 1 ]]; then
+  exit 1
+fi
+
+usbdevice=`readlink -f /dev/disk/by-id/usb-HP_iLO*-part1`
+
+if [ "x${usbdevice}x" == "xx"  ]; then
+  exit 1
+fi
+
+filesystem=`fsck -N ${usbdevice} | sed -n "s|.*fsck.\(ext[2-4]\) ${usbdevice}|\1|p"`
+
+if [ "x${filesystem}x" == "xx" ]; then
+  exit 1
+fi
+
+if [ ! -d /luks ]; then
+  exit 1
+fi
+
+sed -i -e "s|DEV|${usbdevice}|g" -e "s|FS|${filesystem}|g" /usr/share/dracut/modules.d/70luks-key/mount-keystore.sh
+
+exit 0
+

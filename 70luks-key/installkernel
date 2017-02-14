@@ -1,0 +1,2 @@
+#!/bin/bash
+instmods xhci_hcd usb usb-storage sd
